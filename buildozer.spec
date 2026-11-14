@@ -1,5 +1,5 @@
 [app]
-title = Tot - Conto Business & Finance
+title = title = Tot - Conto Business and Finance
 icon.filename = %(source.dir)s/icon.png
 package.name = myandroidapp
 package.domain = org.example
