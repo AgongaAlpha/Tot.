@@ -46,7 +46,7 @@ DEMO_STRINGS = {
     "home_total_label": "SALDO TOTALE  ·  EUR",
     "account_opening_party": "Saldo iniziale",
     "account_opening_desc": "Saldo iniziale",
-    "payments_banner": "WAYNE FARO S.R.L",
+    "payments_banner": "FR3E S.R.L",
     "convert_rate_format": "Riceverai circa %s (tasso demo %s GBP per EUR)",
     "confirm_demo_title": "Conferma operazione",
     "confirm_demo_msg": "Il bonifico è in elaborazione.",
@@ -614,11 +614,11 @@ def seed():
     with tx() as c:
         s, h, it = hash_pw("demo123")
         uid = c.execute("INSERT INTO users(full_name,email,phone,pw_salt,pw_hash,pw_iter,created_at) VALUES(?,?,?,?,?,?,?)",
-                        ("Federico Faro", "farofederico265@gmail.com", "+447123456789", s, h, it, now())).lastrowid
+                        ("Fr3e s.r.l", "farofederico265@gmail.com", "+447123456789", s, h, it, now())).lastrowid
         ids = {}
         for kind, name, ccy, opening, sc, an in [("CURRENT", "Conto Corrente EUR", "EUR", 10000000, "40-22-04", "82910382"),
                                                   ("SAVINGS", "Conto Risparmio EUR", "EUR", 10000000, "40-22-04", "82910399"),
-                                                  ("WALLET", "Wayne S.R.L Main Account", "EUR", 10000000, "99-00-12", "55100382")]:
+                                                  ("WALLET", "Fr3e S.R.L Main Account", "EUR", 10000000, "99-00-12", "55100382")]:
             iban = make_iban("GB", "TOTB" + sc.replace("-", "") + an) if ccy == "GBP" else mock_iban(sc, an)
             aid = c.execute("INSERT INTO accounts(user_id,kind,name,currency,balance_minor,sort_code,account_number,iban) VALUES(?,?,?,?,0,?,?,?)",
                             (uid, kind, name, ccy, sc, an, iban)).lastrowid
@@ -644,9 +644,10 @@ def seed():
 def ensure_demo_user():
     """Old database files keep the OLD demo user (old email/password) because seed() only runs on an empty DB.
     If the demo login is missing, repoint the first user to the current demo credentials and clear any lockout."""
-    email, phone, name = "farofederico265@gmail.com", "+447123456789", "Federico Faro"
+    email, phone, name = "farofederico265@gmail.com", "+447123456789", "Fr3e s.r.l"
     if q1("SELECT id FROM users WHERE email=?", (email,)):
-        conn.execute("UPDATE users SET failed_attempts=0, locked_until=0 WHERE email=?", (email,))
+        conn.execute("UPDATE users SET failed_attempts=0, locked_until=0, full_name=? WHERE email=?", (name, email))
+        conn.execute("UPDATE accounts SET name='Fr3e S.R.L Main Account' WHERE name LIKE 'Wayne%'")
         return
     first = q1("SELECT id FROM users ORDER BY id LIMIT 1")
     if not first:
@@ -835,7 +836,7 @@ def show_txn(tid, after=None):
     for k, v in rows:
         if v:
             box.add_widget(lab("%s: %s" % (k, v), 13, MUTED))
-    box.add_widget(lab("RICEVUTA WAYNE S.R.L", 11, AMBER))
+    box.add_widget(lab("RICEVUTA FR3E S.R.L", 11, AMBER))
     sv.add_widget(box)
     body.add_widget(sv)
     p = popup("Dettaglio transazione", body, (0.94, 0.8))
